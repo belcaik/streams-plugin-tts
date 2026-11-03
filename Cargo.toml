@@ -13,6 +13,12 @@ path = "src/lib.rs"
 name = "tts"
 path = "src/main.rs"
 
+[[bin]]
+name = "fake-tts-engine"
+path = "src/bin/fake-tts-engine.rs"
+test = false
+bench = false
+
 [dependencies]
 base64 = "0.22"
 serde = { version = "1", features = ["derive"] }
