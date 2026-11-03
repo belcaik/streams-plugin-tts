@@ -1,0 +1,56 @@
+name = "tts"
+version = "0.1.0"
+description = "Queued, moderated local text-to-speech for stream interactions"
+
+[permissions]
+listens = ["redemption", "donation", "chat", "tts_done"]
+emits = ["tts_audio", "tts_status"]
+
+[worker]
+command = ["bin/tts"]
+
+[config]
+max_message_chars = 280
+max_queue = 20
+cooldown_seconds = 60
+playback_timeout_seconds = 90
+remove_urls = true
+max_repeated_chars = 3
+blocked_words = []
+blocked_replacement = "***"
+skip_commands = ["!skip"]
+clear_commands = ["!ttsclear"]
+volume = 1.0
+show_text = true
+show_user = true
+
+[config.triggers.twitch]
+enabled = true
+reward_title = "TTS"
+
+[config.triggers.youtube]
+donations_enabled = true
+minimum_amount = 1.0
+members_enabled = true
+
+[config.triggers.kick]
+enabled = true
+command = "!tts"
+roles = ["subscriber", "moderator", "broadcaster"]
+
+[config.engine]
+kind = "piper"
+speed = 1.0
+synthesis_timeout_seconds = 30
+max_audio_bytes = 8388608
+
+[config.engine.piper]
+binary = "piper"
+model = "models/voice.onnx"
+extra_args = []
+
+[config.engine.espeak]
+binary = "espeak-ng"
+voice = "es"
+base_wpm = 175
+extra_args = []
