@@ -1,0 +1,102 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+.st-tts {
+  --st-tts-font-family: system-ui, sans-serif;
+  --st-tts-width: 640px;
+  --st-tts-padding: 16px 20px;
+  --st-tts-gap: 6px;
+  --st-tts-color: #ffffff;
+  --st-tts-muted-color: #b8b8c0;
+  --st-tts-background: rgba(20, 20, 24, 0.92);
+  --st-tts-accent: #9146ff;
+  --st-tts-error: #ff5c5c;
+  --st-tts-radius: 12px;
+  --st-tts-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --st-tts-user-size: 16px;
+  --st-tts-text-size: 22px;
+  --st-tts-status-size: 12px;
+  --st-tts-transition-duration: 200ms;
+  --st-tts-idle-opacity: 0;
+  --st-tts-idle-transform: translateY(8px);
+
+  width: var(--st-tts-width);
+  max-width: 100vw;
+  font-family: var(--st-tts-font-family);
+  color: var(--st-tts-color);
+}
+
+.st-tts__card {
+  display: grid;
+  gap: var(--st-tts-gap);
+  padding: var(--st-tts-padding);
+  border-left: 4px solid var(--st-tts-accent);
+  border-radius: var(--st-tts-radius);
+  background: var(--st-tts-background);
+  box-shadow: var(--st-tts-shadow);
+  transition:
+    opacity var(--st-tts-transition-duration) ease,
+    transform var(--st-tts-transition-duration) ease,
+    border-color var(--st-tts-transition-duration) ease;
+}
+
+.st-tts__user,
+.st-tts__text,
+.st-tts__status {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.st-tts__user {
+  font-size: var(--st-tts-user-size);
+  font-weight: 700;
+  color: var(--st-tts-accent);
+}
+
+.st-tts__text {
+  font-size: var(--st-tts-text-size);
+  line-height: 1.3;
+}
+
+.st-tts__status {
+  font-size: var(--st-tts-status-size);
+  color: var(--st-tts-muted-color);
+}
+
+.st-tts__status:empty {
+  display: none;
+}
+
+.st-tts__audio {
+  display: none;
+}
+
+.st-tts--idle .st-tts__card {
+  opacity: var(--st-tts-idle-opacity);
+  transform: var(--st-tts-idle-transform);
+}
+
+.st-tts--playing .st-tts__card {
+  opacity: 1;
+  transform: none;
+}
+
+.st-tts--error .st-tts__card {
+  border-left-color: var(--st-tts-error);
+}
+
+.st-tts--error .st-tts__status {
+  color: var(--st-tts-error);
+}
+
+[hidden] {
+  display: none !important;
+}
