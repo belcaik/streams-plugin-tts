@@ -1,22 +1,21 @@
-use std::{
-    error::Error,
-    io::{self, BufRead, BufReader},
+use std::io::{self, BufReader};
+
+use streams_plugin_tts::{
+    coordinator::SystemClock,
+    engine::ProcessEngine,
+    runtime::{self, RuntimeError},
 };
 
-use streams_plugin_tts::protocol::{parse_input_line, read_first_init};
-
-fn run() -> Result<(), Box<dyn Error>> {
-    let stdin = io::stdin();
-    let mut reader = BufReader::new(stdin.lock());
-    let _init = read_first_init(&mut reader)?;
-    for line in reader.lines() {
-        let line = line?;
-        match parse_input_line(&line) {
-            Ok(_) => eprintln!("evento válido descartado: worker aún no conectado"),
-            Err(error) => eprintln!("entrada descartada: {error}"),
-        }
-    }
-    Ok(())
+fn run() -> Result<(), RuntimeError> {
+    let stdout = io::stdout();
+    // stderr queda sin bloquear para que otros hilos puedan diagnosticar.
+    runtime::run(
+        BufReader::new(io::stdin()),
+        stdout.lock(),
+        io::stderr(),
+        |config| ProcessEngine::from_config(&config.engine),
+        SystemClock::default(),
+    )
 }
 
 fn main() {
