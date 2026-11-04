@@ -1,4 +1,5 @@
 pub mod config;
+pub mod coordinator;
 pub mod engine;
 pub mod filter;
 pub mod model;
