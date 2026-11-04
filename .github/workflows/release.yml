@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: ubuntu-24.04, target: x86_64-unknown-linux-gnu, executable: tts }
+          - { runner: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu, executable: tts }
+          - { runner: windows-latest, target: x86_64-pc-windows-msvc, executable: tts.exe }
+          - { runner: macos-15-intel, target: x86_64-apple-darwin, executable: tts }
+          - { runner: macos-15, target: aarch64-apple-darwin, executable: tts }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release --locked --bin tts --target ${{ matrix.target }}
+      - if: runner.os != 'Windows'
+        name: Preparar carpeta POSIX
+        shell: bash
+        run: |
+          mkdir -p dist/tts/{bin,overlay}
+          cp plugin.toml README.md LICENSE dist/tts/
+          cp -R overlay/. dist/tts/overlay/
+          cp "target/${{ matrix.target }}/release/tts" dist/tts/bin/
+      - if: runner.os == 'Windows'
+        name: Preparar carpeta Windows
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/tts/bin, dist/tts/overlay | Out-Null
+          Copy-Item plugin.toml, README.md, LICENSE dist/tts/
+          Copy-Item overlay/* dist/tts/overlay/ -Recurse
+          Copy-Item "target/${{ matrix.target }}/release/${{ matrix.executable }}" dist/tts/bin/
+      - if: runner.os != 'Windows'
+        name: Verificar contenido POSIX
+        shell: bash
+        run: |
+          for file in plugin.toml README.md LICENSE overlay/index.html overlay/style.css overlay/app.js overlay/tts-core.js bin/tts; do
+            test -f "dist/tts/$file" || { echo "Falta $file"; exit 1; }
+          done
+          test "$(ls dist/tts/bin)" = "tts" || { echo "bin/ sólo debe contener tts"; exit 1; }
+      - if: runner.os == 'Windows'
+        name: Verificar contenido Windows
+        shell: pwsh
+        run: |
+          $files = 'plugin.toml', 'README.md', 'LICENSE', 'overlay/index.html', 'overlay/style.css', 'overlay/app.js', 'overlay/tts-core.js', 'bin/tts.exe'
+          foreach ($file in $files) {
+            if (-not (Test-Path "dist/tts/$file" -PathType Leaf)) { throw "Falta $file" }
+          }
+          $bin = @(Get-ChildItem dist/tts/bin | ForEach-Object Name)
+          if ($bin.Count -ne 1 -or $bin[0] -ne 'tts.exe') { throw "bin/ sólo debe contener tts.exe" }
+      - if: runner.os != 'Windows'
+        name: Comprimir ZIP POSIX
+        shell: bash
+        run: cd dist && zip -r "tts-${{ matrix.target }}.zip" tts
+      - if: runner.os == 'Windows'
+        name: Comprimir ZIP Windows
+        shell: pwsh
+        run: Compress-Archive -Path dist/tts -DestinationPath "dist/tts-${{ matrix.target }}.zip" -Force
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: dist/*.zip
+          fail_on_unmatched_files: true
