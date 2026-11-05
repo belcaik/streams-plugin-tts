@@ -10,7 +10,7 @@ use serde_json::Value;
 
 use crate::{
     config::{Config, ConfigError},
-    model::{Init, InputEvent, OutputEvent},
+    model::{DoneData, Init, InputEvent, OutputEvent},
 };
 
 #[derive(Debug)]
@@ -81,7 +81,15 @@ pub fn read_first_init(reader: &mut impl BufRead) -> Result<Init, ProtocolError>
 }
 
 pub fn parse_input_line(line: &str) -> Result<InputEvent, ProtocolError> {
-    Ok(serde_json::from_str(line)?)
+    let event: InputEvent = serde_json::from_str(line)?;
+    if event.kind == "tts_done" {
+        parse_done(&event)?;
+    }
+    Ok(event)
+}
+
+pub fn parse_done(event: &InputEvent) -> Result<DoneData, ProtocolError> {
+    Ok(DoneData::deserialize(&event.data)?)
 }
 
 pub fn write_output(writer: &mut impl Write, output: &OutputEvent) -> Result<(), ProtocolError> {
