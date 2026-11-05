@@ -1,5 +1,5 @@
 name = "tts"
-version = "0.1.0"
+version = "0.1.1"
 description = "Queued, moderated local text-to-speech for stream interactions"
 
 [permissions]
