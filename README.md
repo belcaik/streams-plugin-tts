@@ -31,7 +31,7 @@ También puedes instalarlo desde la línea de comandos:
 streams-tools plugin add https://github.com/belcaik/streams-plugin-tts
 ```
 
-Ambos métodos descargan el ZIP de la release apropiado para la plataforma, verifican su SHA-256 y conservan la carpeta `tts/` administrada por el host. Para fijar la versión usa `https://github.com/belcaik/streams-plugin-tts@v0.1.0`. El plugin no incluye motores ni voces: instálalos aparte (ver más abajo).
+Ambos métodos descargan el ZIP de la release apropiado para la plataforma, verifican su SHA-256 y conservan la carpeta `tts/` administrada por el host. Para fijar la versión usa `https://github.com/belcaik/streams-plugin-tts@v0.1.1`. El plugin no incluye motores ni voces: instálalos aparte (ver más abajo).
 
 ### Fuente de navegador OBS
 
