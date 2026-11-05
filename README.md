@@ -18,19 +18,20 @@ Se ignoran el resto de eventos: donaciones y chat común de Twitch, chat de Kick
 
 ## Instalación
 
-### Desde una release
+Añade el repositorio a `config.toml` de streams-tools para instalar el plugin cuando falte:
 
-Descarga `tts-<target>.zip` de tu plataforma y descomprímelo en `plugins/` de streams-tools. Cada ZIP contiene la carpeta `tts/` con `plugin.toml`, `README.md`, `LICENSE`, `overlay/` y `bin/tts` (`bin/tts.exe` en Windows). No incluye motores ni voces: instálalos aparte (ver más abajo).
+```toml
+[plugins]
+install = ["https://github.com/belcaik/streams-plugin-tts"]
+```
 
-### Como submódulo
+También puedes instalarlo desde la línea de comandos:
 
 ```sh
-git submodule add https://github.com/belcaik/streams-plugin-tts plugins/tts
-cd plugins/tts
-cargo build --release --bin tts
-mkdir -p bin
-cp target/release/tts bin/       # en Windows: tts.exe
+streams-tools plugin add https://github.com/belcaik/streams-plugin-tts
 ```
+
+Ambos métodos descargan el ZIP de la release apropiado para la plataforma, verifican su SHA-256 y conservan la carpeta `tts/` administrada por el host. Para fijar la versión usa `https://github.com/belcaik/streams-plugin-tts@v0.1.0`. El plugin no incluye motores ni voces: instálalos aparte (ver más abajo).
 
 ### Fuente de navegador OBS
 
@@ -38,10 +39,12 @@ Añade un Browser Source con URL `http://127.0.0.1:7777/p/tts/`. Un tamaño inic
 
 ## Configuración
 
-El host entrega `[config]` como objeto JSON al worker. Esta es la configuración inicial completa de `plugin.toml`:
+No edites `plugin.toml`: una actualización reemplaza la carpeta completa del plugin. Define sólo tus cambios en `config.toml` de streams-tools bajo `[plugins.config.tts]`. El host hace deep merge sobre los defaults `[config]` del manifiesto; las tablas se mezclan recursivamente y los escalares y arrays se reemplazan.
+
+Esta es la configuración completa expresada como overrides del host; normalmente basta con incluir las claves que quieras cambiar:
 
 ```toml
-[config]
+[plugins.config.tts]
 max_message_chars = 280
 max_queue = 20
 cooldown_seconds = 60
@@ -56,32 +59,32 @@ volume = 1.0
 show_text = true
 show_user = true
 
-[config.triggers.twitch]
+[plugins.config.tts.triggers.twitch]
 enabled = true
 reward_title = "TTS"
 
-[config.triggers.youtube]
+[plugins.config.tts.triggers.youtube]
 donations_enabled = true
 minimum_amount = 1.0
 members_enabled = true
 
-[config.triggers.kick]
+[plugins.config.tts.triggers.kick]
 enabled = true
 command = "!tts"
 roles = ["subscriber", "moderator", "broadcaster"]
 
-[config.engine]
+[plugins.config.tts.engine]
 kind = "piper"
 speed = 1.0
 synthesis_timeout_seconds = 30
 max_audio_bytes = 8388608
 
-[config.engine.piper]
+[plugins.config.tts.engine.piper]
 binary = "piper"
 model = "models/voice.onnx"
 extra_args = []
 
-[config.engine.espeak]
+[plugins.config.tts.engine.espeak]
 binary = "espeak-ng"
 voice = "es"
 base_wpm = 175
@@ -260,7 +263,7 @@ Ejemplo de `styles/tts.css`:
 - El WAV temporal se crea en exclusiva en `data_dir/tmp/` con un nombre propio del worker y se borra en éxito y error. La ruta nunca viene del chat.
 - El texto sin sanear no se escribe en stderr.
 - El overlay inserta datos sólo con `textContent`, nunca como HTML.
-- La configuración local (`plugin.toml`, binarios, `extra_args`) se considera confiable: la escribe el administrador del stream.
+- La configuración principal, las rutas de binarios y `extra_args` se consideran confiables: las controla el administrador del stream.
 
 ## Desarrollo
 
